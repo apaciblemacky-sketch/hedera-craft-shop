@@ -1,17 +1,15 @@
 import os
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'hedera-secret-craft-key-2026'  # Required for admin login session
+app.config['SECRET_KEY'] = 'hedera-secure-secret-key-2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///crafts.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-# Admin Credentials
-ADMIN_PASSWORD = "hederaadmin"  # You can change your admin password here
 
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -21,18 +19,13 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Admin login protection decorator
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not session.get('is_admin'):
-            return redirect(url_for('admin_login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
 db = SQLAlchemy(app)
 
 # Database Models
+class AdminConfig(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+
 class CraftItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
@@ -64,6 +57,15 @@ class Order(db.Model):
     status = db.Column(db.String(50), default="Pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     item_id = db.Column(db.Integer, db.ForeignKey('craft_item.id'), nullable=False)
+
+# Login protection helper
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('is_admin'):
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # ==================== PUBLIC STORE ====================
 
@@ -124,14 +126,15 @@ def order_item(item_id):
 
     return render_template('order_form.html', item=item)
 
-# ==================== ADMIN AUTHENTICATION ====================
+# ==================== ADMIN AUTH & PASSWORD MANAGEMENT ====================
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     error = None
     if request.method == 'POST':
-        password = request.form.get('password')
-        if password == ADMIN_PASSWORD:
+        entered_password = request.form.get('password', '')
+        config = AdminConfig.query.first()
+        if config and check_password_hash(config.password_hash, entered_password):
             session['is_admin'] = True
             return redirect(url_for('admin_dashboard'))
         error = "Incorrect password. Please try again."
@@ -142,14 +145,37 @@ def admin_logout():
     session.pop('is_admin', None)
     return redirect(url_for('index'))
 
-# ==================== ADMIN MANAGEMENT ====================
+@app.route('/admin/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    message = None
+    error = None
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        config = AdminConfig.query.first()
+        if not check_password_hash(config.password_hash, current_password):
+            error = "Current password is incorrect."
+        elif len(new_password) < 4:
+            error = "New password must be at least 4 characters long."
+        elif new_password != confirm_password:
+            error = "New passwords do not match."
+        else:
+            config.password_hash = generate_password_hash(new_password)
+            db.session.commit()
+            message = "Password updated successfully!"
+
+    return render_template('change_password.html', message=message, error=error)
+
+# ==================== ADMIN DASHBOARD ====================
 
 @app.route('/admin')
 @login_required
 def admin_dashboard():
     sort_by = request.args.get('sort', 'newest')
     
-    # Sorting logic for orders
     if sort_by == 'oldest':
         orders = Order.query.order_by(Order.created_at.asc()).all()
     elif sort_by == 'highest_price':
@@ -158,7 +184,7 @@ def admin_dashboard():
         orders = Order.query.order_by(Order.total_price.asc()).all()
     elif sort_by == 'status':
         orders = Order.query.order_by(Order.status.asc()).all()
-    else:  # newest first
+    else:
         orders = Order.query.order_by(Order.created_at.desc()).all()
 
     items = CraftItem.query.all()
@@ -239,9 +265,15 @@ def update_order_status(order_id):
         db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
-# Create tables and initial items on startup for both local and cloud servers
+# Application Startup Initialization
 with app.app_context():
     db.create_all()
+    # Create initial admin password if none exists (Default: hederaadmin)
+    if not AdminConfig.query.first():
+        default_admin = AdminConfig(password_hash=generate_password_hash("hederaadmin"))
+        db.session.add(default_admin)
+        db.session.commit()
+
     if not CraftItem.query.first():
         demo_items = [
             CraftItem(name="Handmade Ceramic Mug", description="Wheel-thrown stoneware with a reactive glaze finish.", price=350.00, image_url="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop"),
