@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+  <p style="margin-bottom: 1.5rem;"><a href="{{ url_for('item_detail', item_id=item.id) }}" style="color: #2d5a27; font-weight: 600; text-decoration: none;">← Back to Product</a></p>
+
+  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; max-width: 520px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+    <h2 style="color: #1a202c; margin-bottom: 0.4rem;">Reserve: {{ item.name }}</h2>
+    <p style="font-size: 1.3rem; font-weight: 700; color: #2d5a27; margin-bottom: 1rem;">₱{{ "{:,.2f}".format(item.price) }}</p>
+    
+    <div style="background: #f0fdf4; border-left: 4px solid #2d5a27; padding: 12px; margin-bottom: 1.5rem; border-radius: 4px; font-size: 0.9rem; color: #166534;">
+      📍 <strong>Pickup Point:</strong> Macleen's Food House<br>
+      We will contact your Facebook account and email for order verification.
+    </div>
+
+    <form method="POST">
+      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Full Name</label>
+      <input type="text" name="customer_name" required placeholder="e.g. Maria Santos" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+
+      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Phone / Contact Number</label>
+      <input type="tel" name="contact_number" required placeholder="e.g. 0917 123 4567" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+
+      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Email Address</label>
+      <input type="email" name="email" required placeholder="e.g. maria@example.com" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+
+      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Facebook Account Name / Profile Link</label>
+      <input type="text" name="fb_account" required placeholder="e.g. Maria Santos or facebook.com/maria" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+
+      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Quantity</label>
+      <input type="number" name="quantity" value="1" min="1" max="20" required style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+
+      <button class="btn" type="submit" style="margin-top: 1.5rem;">Confirm Pickup Order</button>
+    </form>
+  </div>
+{% endblock %}

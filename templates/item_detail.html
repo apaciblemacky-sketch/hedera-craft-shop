@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+  <p style="margin-bottom: 1.5rem;"><a href="/" style="color: #2d5a27; font-weight: 600; text-decoration: none;">← Back to All Crafts</a></p>
+
+  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; display: flex; gap: 2.5rem; flex-wrap: wrap;">
+    <img src="{{ item.image_url }}" style="width: 380px; height: 280px; object-fit: cover; border-radius: 8px; border: 1px solid #eee;" alt="{{ item.name }}">
+    <div style="flex: 1; min-width: 280px;">
+      <h1 style="font-size: 2rem; color: #1a202c; margin-bottom: 0.5rem;">{{ item.name }}</h1>
+      <h2 style="color: #2d5a27; font-size: 1.6rem; margin-bottom: 1rem;">₱{{ "{:,.2f}".format(item.price) }}</h2>
+      <p style="color: #4a5568; margin-bottom: 1.5rem;">{{ item.description }}</p>
+
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <form action="{{ url_for('like_item', item_id=item.id) }}" method="POST">
+          <button class="btn btn-like" type="submit">❤️ Like ({{ item.likes }})</button>
+        </form>
+        <a href="{{ url_for('order_item', item_id=item.id) }}" class="btn" style="width: auto; padding: 0.6rem 1.8rem;">🛒 Order for Pickup</a>
+      </div>
+    </div>
+  </div>
+
+  <hr style="margin: 2.5rem 0; border: none; border-top: 1px solid #e2e8f0;">
+
+  <h3 style="margin-bottom: 1rem;">Customer Feedback & Comments ({{ item.comments|length }})</h3>
+  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; max-width: 600px; margin-bottom: 2rem;">
+    <form action="{{ url_for('add_comment', item_id=item.id) }}" method="POST">
+      <input type="text" name="author" placeholder="Your name (optional)" style="width: 100%; padding: 0.6rem; margin-bottom: 0.8rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+      <textarea name="content" required placeholder="Write a comment or question..." style="width: 100%; height: 80px; padding: 0.6rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;"></textarea>
+      <button class="btn" type="submit" style="width: auto; margin-top: 0.8rem; padding: 0.5rem 1.2rem;">Post Comment</button>
+    </form>
+  </div>
+
+  {% for c in item.comments %}
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 0.8rem; max-width: 600px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+        <strong style="color: #2d3748;">{{ c.author }}</strong>
+        <span style="font-size: 0.8rem; color: #a0aec0;">{{ c.timestamp.strftime('%b %d, %Y %I:%M %p') }}</span>
+      </div>
+      <p style="color: #4a5568; margin: 0;">{{ c.content }}</p>
+    </div>
+  {% else %}
+    <p style="color: #718096;">No comments yet.</p>
+  {% endfor %}
+{% endblock %}

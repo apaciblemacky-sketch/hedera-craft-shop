@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.8rem; color: #1a202c;">🔒 Hedera Owner Admin</h1>
+      <p style="color: #718096; font-size: 0.95rem;">Monitor sales metrics, sort pickup orders, and manage inventory.</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <a href="/admin/add-item" class="btn" style="width: auto; padding: 0.6rem 1.2rem;">+ Upload Craft</a>
+      <a href="/admin/logout" class="btn" style="width: auto; background: #e2e8f0; color: #4a5568; padding: 0.6rem 1rem;">Logout</a>
+    </div>
+  </div>
+
+  <!-- Store Metrics -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+    <div style="background: #ffffff; padding: 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
+      <small style="color: #718096; font-weight: 600;">Total Orders</small>
+      <h2 style="margin: 0.4rem 0 0 0; color: #2d3748;">{{ metrics.total_orders }}</h2>
+    </div>
+    <div style="background: #ffffff; padding: 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
+      <small style="color: #718096; font-weight: 600;">Completed / Closed</small>
+      <h2 style="margin: 0.4rem 0 0 0; color: #2d5a27;">{{ metrics.completed_orders }}</h2>
+    </div>
+    <div style="background: #ffffff; padding: 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
+      <small style="color: #718096; font-weight: 600;">Est. Revenue</small>
+      <h2 style="margin: 0.4rem 0 0 0; color: #2d5a27;">₱{{ "{:,.2f}".format(metrics.total_revenue) }}</h2>
+    </div>
+    <div style="background: #ffffff; padding: 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
+      <small style="color: #718096; font-weight: 600;">Total Views</small>
+      <h2 style="margin: 0.4rem 0 0 0; color: #2d3748;">{{ metrics.total_views }}</h2>
+    </div>
+  </div>
+
+  <!-- Manage Products -->
+  <h3 style="margin-bottom: 1rem; color: #2d3748;">Active Craft Items</h3>
+  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; margin-bottom: 2.5rem;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead>
+        <tr style="background: #f8fafc; color: #4a5568; border-bottom: 1px solid #e2e8f0;">
+          <th style="padding: 10px;">Item</th>
+          <th style="padding: 10px;">Price</th>
+          <th style="padding: 10px;">Views / Likes</th>
+          <th style="padding: 10px;">Comments</th>
+          <th style="padding: 10px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 10px; display: flex; align-items: center; gap: 10px;">
+            <img src="{{ item.image_url }}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px;" alt="">
+            <strong>{{ item.name }}</strong>
+          </td>
+          <td style="padding: 10px; font-weight: bold; color: #2d5a27;">₱{{ "{:,.2f}".format(item.price) }}</td>
+          <td style="padding: 10px;">👁️ {{ item.views }} &nbsp;|&nbsp; ❤️ {{ item.likes }}</td>
+          <td style="padding: 10px;">💬 {{ item.comments|length }}</td>
+          <td style="padding: 10px;">
+            <div style="display: flex; gap: 8px;">
+              <a href="{{ url_for('edit_item', item_id=item.id) }}" class="btn-edit">✏️ Edit</a>
+              <form action="{{ url_for('delete_item', item_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this craft item?');">
+                <button type="submit" class="btn-delete">🗑️ Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Manage Pickup Orders with Sort Controls -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+    <h3 style="color: #2d3748; margin: 0;">Macleen's Food House Pickup Orders ({{ orders|length }})</h3>
+    <form method="GET" style="display: flex; align-items: center; gap: 8px;">
+      <label style="font-size: 0.9rem; font-weight: 600; color: #4a5568;">Sort By:</label>
+      <select name="sort" onchange="this.form.submit()" style="padding: 6px 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
+        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Date (Newest First)</option>
+        <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Date (Oldest First)</option>
+        <option value="highest_price" {% if current_sort == 'highest_price' %}selected{% endif %}>Total Amount (High to Low)</option>
+        <option value="lowest_price" {% if current_sort == 'lowest_price' %}selected{% endif %}>Total Amount (Low to High)</option>
+        <option value="status" {% if current_sort == 'status' %}selected{% endif %}>Order Status</option>
+      </select>
+    </form>
+  </div>
+
+  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead>
+        <tr style="background: #2d5a27; color: #ffffff;">
+          <th style="padding: 12px;">Order ID</th>
+          <th style="padding: 12px;">Customer Details</th>
+          <th style="padding: 12px;">Item & Qty</th>
+          <th style="padding: 12px;">Total Price</th>
+          <th style="padding: 12px;">Current Status</th>
+          <th style="padding: 12px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 12px; vertical-align: top;">#{{ o.id }}<br><small style="color: #a0aec0;">{{ o.created_at.strftime('%b %d, %Y') }}</small></td>
+          <td style="padding: 12px; vertical-align: top;">
+            <strong>{{ o.customer_name }}</strong><br>
+            📞 {{ o.contact_number }}<br>
+            ✉️ {{ o.email }}<br>
+            💬 FB: {{ o.fb_account }}
+          </td>
+          <td style="padding: 12px; vertical-align: top;">{{ o.craft_item.name }} (x{{ o.quantity }})</td>
+          <td style="padding: 12px; vertical-align: top; font-weight: bold; color: #2d5a27;">₱{{ "{:,.2f}".format(o.total_price) }}</td>
+          <td style="padding: 12px; vertical-align: top;">
+            <span class="badge {% if o.status == 'Pending' %}badge-pending{% elif o.status == 'Ready for Pickup' %}badge-ready{% else %}badge-completed{% endif %}">
+              {{ o.status }}
+            </span>
+          </td>
+          <td style="padding: 12px; vertical-align: top;">
+            <form action="{{ url_for('update_order_status', order_id=o.id) }}" method="POST" style="display: flex; gap: 6px;">
+              <select name="status" style="padding: 4px 6px; border: 1px solid #cbd5e0; border-radius: 4px;">
+                <option value="Pending" {% if o.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Ready for Pickup" {% if o.status == 'Ready for Pickup' %}selected{% endif %}>Ready for Pickup</option>
+                <option value="Completed" {% if o.status == 'Completed' %}selected{% endif %}>Completed (Closed)</option>
+              </select>
+              <button type="submit" class="btn" style="width: auto; padding: 4px 10px; font-size: 0.8rem;">Update</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" style="padding: 24px; text-align: center; color: #a0aec0;">No pickup orders placed yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

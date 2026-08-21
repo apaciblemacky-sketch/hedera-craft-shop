@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="page-header">
+    <h1 class="page-title">Handcrafted Collection</h1>
+    <p class="page-subtitle">Available for local pickup at Macleen's Food House</p>
+  </div>
+
+  <div class="product-grid">
+    {% for item in items %}
+      <div class="product-card">
+        <img 
+          src="{{ item.image_url }}" 
+          alt="{{ item.name }}" 
+          class="product-image"
+          onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop';"
+        >
+        <div class="product-body">
+          <h2 class="product-title">{{ item.name }}</h2>
+          <div class="product-price">${{ "%.2f"|format(item.price) }}</div>
+          <div class="product-stats">
+            <span>❤️ {{ item.likes }} Likes</span>
+            <span>💬 {{ item.comments|length }} Comments</span>
+          </div>
+          <div style="margin-top: auto;">
+            <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn">View & Order</a>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p style="color: #718096;">No craft items added yet. Click "+ Add Craft" above to list your first item!</p>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌿 Hedera Crafts</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f7f9f6; color: #2c3e50; line-height: 1.6; }
+    
+    header { background: #ffffff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .navbar { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; }
+    .brand { font-size: 1.4rem; font-weight: 700; color: #2d5a27; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+    .nav-links { display: flex; gap: 1rem; align-items: center; }
+    .nav-link { color: #4a5568; text-decoration: none; font-weight: 500; padding: 0.5rem 0.8rem; border-radius: 6px; }
+    .nav-link:hover { background: #e8f5e9; color: #2d5a27; }
+    .admin-link { color: #888; font-size: 0.85rem; border: 1px dashed #ccc; }
+
+    .container { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem; }
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
+    .product-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+    .product-image { width: 100%; height: 220px; object-fit: cover; background: #e2e8f0; }
+    .product-body { padding: 1.25rem; display: flex; flex-direction: column; flex-grow: 1; }
+    .product-title { font-size: 1.2rem; font-weight: 600; color: #2d3748; margin-bottom: 0.4rem; }
+    .product-price { font-size: 1.3rem; font-weight: 700; color: #2d5a27; margin-bottom: 0.8rem; }
+    .product-stats { display: flex; gap: 1rem; color: #718096; font-size: 0.85rem; margin-bottom: 1.2rem; }
+    
+    .btn { display: inline-block; width: 100%; text-align: center; background: #2d5a27; color: #ffffff; padding: 0.7rem 1.2rem; border-radius: 6px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; }
+    .btn:hover { background: #23471f; }
+    .btn-like { background: #fee2e2; color: #dc2626; width: auto; padding: 0.6rem 1.2rem; }
+    .btn-edit { background: #3182ce; color: #fff; padding: 6px 12px; font-size: 0.85rem; text-decoration: none; border-radius: 4px; }
+    .btn-delete { background: #e53e3e; color: #fff; padding: 6px 12px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer; }
+    
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+    .badge-pending { background: #ffeaa7; color: #d63031; }
+    .badge-ready { background: #81ecec; color: #0984e3; }
+    .badge-completed { background: #55efc4; color: #00b894; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="navbar">
+      <a href="/" class="brand">🌿 Hedera</a>
+      <nav class="nav-links">
+        <a href="/" class="nav-link">Craft Collection</a>
+        <a href="/admin" class="nav-link admin-link">🔒 Owner Admin</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
