@@ -239,15 +239,17 @@ def update_order_status(order_id):
         db.session.commit()
     return redirect(url_for('admin_dashboard'))
 
+# Create tables and initial items on startup for both local and cloud servers
+with app.app_context():
+    db.create_all()
+    if not CraftItem.query.first():
+        demo_items = [
+            CraftItem(name="Handmade Ceramic Mug", description="Wheel-thrown stoneware with a reactive glaze finish.", price=350.00, image_url="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop"),
+            CraftItem(name="Macrame Wall Hanging", description="100% natural cotton cord on driftwood branch.", price=750.00, image_url="https://images.unsplash.com/photo-1528458909336-e7a0adfed0a5?w=500&auto=format&fit=crop"),
+            CraftItem(name="Beeswax Candle Set", description="Trio of hand-poured, clean-burning botanical candles.", price=280.00, image_url="https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500&auto=format&fit=crop")
+        ]
+        db.session.bulk_save_objects(demo_items)
+        db.session.commit()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        if not CraftItem.query.first():
-            demo_items = [
-                CraftItem(name="Handmade Ceramic Mug", description="Wheel-thrown stoneware with a reactive glaze finish.", price=350.00, image_url="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop"),
-                CraftItem(name="Macrame Wall Hanging", description="100% natural cotton cord on driftwood branch.", price=750.00, image_url="https://images.unsplash.com/photo-1528458909336-e7a0adfed0a5?w=500&auto=format&fit=crop"),
-                CraftItem(name="Beeswax Candle Set", description="Trio of hand-poured, clean-burning botanical candles.", price=280.00, image_url="https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500&auto=format&fit=crop")
-            ]
-            db.session.bulk_save_objects(demo_items)
-            db.session.commit()
     app.run(debug=True)
