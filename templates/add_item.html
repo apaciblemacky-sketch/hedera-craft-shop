@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-  <div style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 2rem; max-width: 550px; margin: 1rem auto;">
+  <p style="margin-bottom: 1.5rem;"><a href="/admin" style="color: #db2777; font-weight: 600; text-decoration: none;">← Back to Admin</a></p>
+
+  <div style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 2rem; max-width: 550px; margin: 0 auto;">
     <h2 style="color: #831843; margin-bottom: 0.5rem;">Upload New Craft</h2>
     
     <form method="POST" enctype="multipart/form-data">
@@ -22,8 +24,18 @@
         <input type="number" name="stock_quantity" value="10" min="0" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
       </div>
 
+      <!-- Top Seller & Featured Checkboxes -->
+      <div style="background: #fff5f7; border: 1px solid #fbcfe8; border-radius: 8px; padding: 1rem; margin-top: 1.2rem; display: flex; flex-direction: column; gap: 8px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+          <input type="checkbox" name="is_top_seller" value="1"> ⭐ Mark as Top Seller
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; color: #9333ea;">
+          <input type="checkbox" name="is_featured" value="1"> ✨ Mark as Featured Product
+        </label>
+      </div>
+
       <label style="display:block; margin-top: 1rem; font-weight: 600;">Craft Title</label>
-      <input type="text" name="name" required placeholder="e.g. Pink Beaded Bracelet" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
+      <input type="text" name="name" required placeholder="e.g. Handmade Pink Coaster" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
 
       <label style="display:block; margin-top: 1rem; font-weight: 600;">Description</label>
       <textarea name="description" required rows="3" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;"></textarea>

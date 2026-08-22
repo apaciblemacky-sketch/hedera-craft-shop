@@ -24,6 +24,16 @@
         <input type="number" name="stock_quantity" value="{{ item.stock_quantity }}" min="0" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
       </div>
 
+      <!-- Top Seller & Featured Checkboxes -->
+      <div style="background: #fff5f7; border: 1px solid #fbcfe8; border-radius: 8px; padding: 1rem; margin-top: 1.2rem; display: flex; flex-direction: column; gap: 8px;">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+          <input type="checkbox" name="is_top_seller" value="1" {% if item.is_top_seller %}checked{% endif %}> ⭐ Mark as Top Seller
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; color: #9333ea;">
+          <input type="checkbox" name="is_featured" value="1" {% if item.is_featured %}checked{% endif %}> ✨ Mark as Featured Product
+        </label>
+      </div>
+
       <label style="display:block; margin-top: 1rem; font-weight: 600;">Item Title</label>
       <input type="text" name="name" value="{{ item.name }}" required style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
 
