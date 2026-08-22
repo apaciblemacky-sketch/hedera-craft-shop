@@ -334,6 +334,19 @@ def add_category():
         db.session.add(new_cat)
         db.session.commit()
     return redirect(url_for('admin_dashboard'))
+@app.route('/admin/delete-category/<int:cat_id>', methods=['POST'])
+@login_required
+def delete_category(cat_id):
+    category = Category.query.get_or_404(cat_id)
+    
+    # Reassign any craft items in this category to "General" so items aren't lost
+    items_in_category = CraftItem.query.filter_by(category_name=category.name).all()
+    for item in items_in_category:
+        item.category_name = "General"
+    
+    db.session.delete(category)
+    db.session.commit()
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/order-status/<int:order_id>', methods=['POST'])
 @login_required

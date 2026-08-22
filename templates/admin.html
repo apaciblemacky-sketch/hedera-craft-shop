@@ -32,21 +32,38 @@
     </div>
   </div>
 
-  <!-- Category Creator -->
-  <div style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem;">
-    <h3 style="color: #831843; margin-bottom: 0.5rem;">📁 Create Product Category</h3>
-    <form action="{{ url_for('add_category') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
-      <div style="flex: 1; min-width: 220px;">
-        <label style="font-size: 0.85rem; font-weight: 600;">Category Name</label>
-        <input type="text" name="cat_name" required placeholder="e.g. Stickers, Pins" style="width: 100%; padding: 0.55rem; border: 1px solid #fbcfe8; border-radius: 6px; margin-top: 4px; box-sizing: border-box;">
+<!-- Category Creator & Manager -->
+<div style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem;">
+  <h3 style="color: #831843; margin-bottom: 0.5rem;">📁 Product Categories</h3>
+  
+  <!-- Add Category Form -->
+  <form action="{{ url_for('add_category') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem;">
+    <div style="flex: 1; min-width: 220px;">
+      <label style="font-size: 0.85rem; font-weight: 600;">New Category Name</label>
+      <input type="text" name="cat_name" required placeholder="e.g. Stickers, Accessories" style="width: 100%; padding: 0.55rem; border: 1px solid #fbcfe8; border-radius: 6px; margin-top: 4px; box-sizing: border-box;">
+    </div>
+    <div style="flex: 1; min-width: 220px;">
+      <label style="font-size: 0.85rem; font-weight: 600;">Cover Image</label>
+      <input type="file" name="cat_image" accept="image/*" style="width: 100%; padding: 0.35rem; border: 1px solid #fbcfe8; border-radius: 6px; margin-top: 4px; box-sizing: border-box;">
+    </div>
+    <button type="submit" class="btn" style="width: auto; padding: 0.6rem 1.4rem;">+ Save Category</button>
+  </form>
+
+  <!-- Existing Categories List with Delete Option -->
+  <label style="font-size: 0.85rem; font-weight: 600; color: #6b7280; display: block; margin-bottom: 0.5rem;">Existing Categories:</label>
+  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+    {% for cat in categories %}
+      <div style="display: flex; align-items: center; background: #fff5f7; border: 1px solid #fbcfe8; border-radius: 20px; padding: 4px 10px 4px 12px; gap: 8px;">
+        <span style="font-weight: 600; font-size: 0.85rem; color: #be185d;">{{ cat.name }}</span>
+        <form action="{{ url_for('delete_category', cat_id=cat.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Delete category \'{{ cat.name }}\'? Items in this category will be moved to General.');">
+          <button type="submit" style="background: none; border: none; color: #f43f5e; cursor: pointer; font-size: 0.9rem; padding: 0; line-height: 1;" title="Delete Category">✕</button>
+        </form>
       </div>
-      <div style="flex: 1; min-width: 220px;">
-        <label style="font-size: 0.85rem; font-weight: 600;">Category Cover Image</label>
-        <input type="file" name="cat_image" accept="image/*" style="width: 100%; padding: 0.35rem; border: 1px solid #fbcfe8; border-radius: 6px; margin-top: 4px; box-sizing: border-box;">
-      </div>
-      <button type="submit" class="btn" style="width: auto; padding: 0.6rem 1.4rem;">Save Category</button>
-    </form>
+    {% else %}
+      <span style="color: #9ca3af; font-size: 0.85rem;">No custom categories yet.</span>
+    {% endfor %}
   </div>
+</div>
 
   <!-- Inventory Table & Stock Monitoring -->
   <h3 style="margin-bottom: 1rem; color: #831843;">📦 Inventory Monitoring & Active Catalog</h3>
