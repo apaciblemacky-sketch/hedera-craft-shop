@@ -1,33 +1,49 @@
 {% extends 'base.html' %}
 {% block content %}
-  <p style="margin-bottom: 1.5rem;"><a href="{{ url_for('item_detail', item_id=item.id) }}" style="color: #2d5a27; font-weight: 600; text-decoration: none;">← Back to Product</a></p>
+  <p style="margin-bottom: 1.5rem;"><a href="{{ url_for('item_detail', item_id=item.id) }}" style="color: #db2777; font-weight: 600; text-decoration: none;">← Back to {{ item.name }}</a></p>
 
-  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; max-width: 520px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-    <h2 style="color: #1a202c; margin-bottom: 0.4rem;">Reserve: {{ item.name }}</h2>
-    <p style="font-size: 1.3rem; font-weight: 700; color: #2d5a27; margin-bottom: 1rem;">₱{{ "{:,.2f}".format(item.price) }}</p>
-    
-    <div style="background: #f0fdf4; border-left: 4px solid #2d5a27; padding: 12px; margin-bottom: 1.5rem; border-radius: 4px; font-size: 0.9rem; color: #166534;">
-      📍 <strong>Pickup Point:</strong> Macleen's Food House<br>
-      We will contact your Facebook account and email for order verification.
+  <div style="background: white; border: 1px solid #fbcfe8; border-radius: 16px; padding: 2rem; max-width: 550px; margin: 0 auto; box-shadow: 0 4px 10px rgba(219,39,119,0.05);">
+    <h2 style="color: #831843; margin-bottom: 0.3rem;">
+      {% if item.availability_type == 'In Stock' %}Pickup Reservation{% else %}Pre-Order Reservation{% endif %}
+    </h2>
+    <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 1.5rem;">Pick up location: <strong>Macleen's Food House</strong></p>
+
+    {% if error %}
+      <div style="background: #fee2e2; color: #dc2626; padding: 0.8rem; border-radius: 8px; margin-bottom: 1.2rem; font-weight: 600;">
+        {{ error }}
+      </div>
+    {% endif %}
+
+    <div style="display: flex; gap: 12px; align-items: center; background: #fff5f7; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+      <img src="{{ item.image_url }}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 6px;">
+      <div>
+        <strong>{{ item.name }}</strong>
+        <div style="color: #db2777; font-weight: bold;">₱{{ "{:,.2f}".format(item.price) }}</div>
+        {% if item.availability_type == 'In Stock' %}
+          <small style="color: #15803d; font-weight: 600;">In Stock: {{ item.stock_quantity }} available</small>
+        {% else %}
+          <small style="color: #6d28d9; font-weight: 600;">Pre-Order: Made to order</small>
+        {% endif %}
+      </div>
     </div>
 
     <form method="POST">
-      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Full Name</label>
-      <input type="text" name="customer_name" required placeholder="e.g. Maria Santos" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+      <label style="display:block; font-weight: 600;">Full Name</label>
+      <input type="text" name="customer_name" required placeholder="e.g. Maria Santos" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
 
-      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Phone / Contact Number</label>
-      <input type="tel" name="contact_number" required placeholder="e.g. 0917 123 4567" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+      <label style="display:block; margin-top: 1rem; font-weight: 600;">Contact Number</label>
+      <input type="text" name="contact_number" required placeholder="e.g. 09123456789" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
 
-      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Email Address</label>
-      <input type="email" name="email" required placeholder="e.g. maria@example.com" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+      <label style="display:block; margin-top: 1rem; font-weight: 600;">Email Address</label>
+      <input type="email" name="email" required placeholder="e.g. maria@gmail.com" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
 
-      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Facebook Account Name / Profile Link</label>
-      <input type="text" name="fb_account" required placeholder="e.g. Maria Santos or facebook.com/maria" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+      <label style="display:block; margin-top: 1rem; font-weight: 600;">Facebook Name / Link</label>
+      <input type="text" name="fb_account" required placeholder="e.g. facebook.com/maria.santos" style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
 
-      <label style="display:block; margin-top: 1rem; font-weight: 600; color: #2d3748;">Quantity</label>
-      <input type="number" name="quantity" value="1" min="1" max="20" required style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
+      <label style="display:block; margin-top: 1rem; font-weight: 600;">Quantity</label>
+      <input type="number" name="quantity" value="1" min="1" {% if item.availability_type == 'In Stock' %}max="{{ item.stock_quantity }}"{% endif %} required style="width: 100%; padding: 0.6rem; margin-top: 0.3rem; border: 1px solid #fbcfe8; border-radius: 6px; box-sizing: border-box;">
 
-      <button class="btn" type="submit" style="margin-top: 1.5rem;">Confirm Pickup Order</button>
+      <button type="submit" class="btn" style="margin-top: 1.5rem;">Confirm Reservation</button>
     </form>
   </div>
 {% endblock %}

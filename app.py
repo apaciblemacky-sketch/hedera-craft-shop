@@ -1,13 +1,13 @@
 import os
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'hedera-secure-secret-key-2026'
+app.config['SECRET_KEY'] = 'macleens-crafts-secure-key-2026'
 
 database_url = os.environ.get('DATABASE_URL')
 if database_url and database_url.startswith("postgres://"):
@@ -44,6 +44,11 @@ class CraftItem(db.Model):
     price = db.Column(db.Float, nullable=False)
     image_url = db.Column(db.String(255), default="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop")
     category_name = db.Column(db.String(80), db.ForeignKey('category.name'), nullable=True, default="General")
+    
+    # Inventory & Availability
+    availability_type = db.Column(db.String(20), default="In Stock")  # "In Stock" or "Pre-Order"
+    stock_quantity = db.Column(db.Integer, default=10)                # Relevant if In Stock
+    
     likes = db.Column(db.Integer, default=0)
     views = db.Column(db.Integer, default=0)
     orders_count = db.Column(db.Integer, default=0)
@@ -84,8 +89,6 @@ def login_required(f):
 def index():
     selected_category = request.args.get('category')
     categories = Category.query.all()
-    
-    # Top Sellers showcase (items with highest orders, min 1 view/order)
     top_sellers = CraftItem.query.order_by(CraftItem.orders_count.desc(), CraftItem.likes.desc()).limit(3).all()
 
     if selected_category:
@@ -122,6 +125,7 @@ def add_comment(item_id):
 @app.route('/order/<int:item_id>', methods=['GET', 'POST'])
 def order_item(item_id):
     item = CraftItem.query.get_or_404(item_id)
+    error = None
     if request.method == 'POST':
         name = request.form.get('customer_name', '').strip()
         contact = request.form.get('contact_number', '').strip()
@@ -129,8 +133,16 @@ def order_item(item_id):
         fb = request.form.get('fb_account', '').strip()
         quantity = int(request.form.get('quantity', 1))
 
-        if name and contact and email and fb and quantity > 0:
+        # Inventory check for In-Stock items
+        if item.availability_type == "In Stock" and quantity > item.stock_quantity:
+            error = f"Sorry, only {item.stock_quantity} item(s) currently available in stock."
+        elif name and contact and email and fb and quantity > 0:
             total = item.price * quantity
+            
+            # Deduct stock if In Stock
+            if item.availability_type == "In Stock":
+                item.stock_quantity -= quantity
+
             new_order = Order(
                 customer_name=name,
                 contact_number=contact,
@@ -145,7 +157,7 @@ def order_item(item_id):
             db.session.commit()
             return render_template('order_success.html', order=new_order, item=item)
 
-    return render_template('order_form.html', item=item)
+    return render_template('order_form.html', item=item, error=error)
 
 # ==================== ADMIN ROUTES ====================
 
@@ -194,34 +206,30 @@ def change_password():
 @login_required
 def admin_dashboard():
     sort_by = request.args.get('sort', 'newest')
-    
-    if sort_by == 'oldest':
-        orders = Order.query.order_by(Order.created_at.asc()).all()
-    elif sort_by == 'highest_price':
-        orders = Order.query.order_by(Order.total_price.desc()).all()
-    elif sort_by == 'lowest_price':
-        orders = Order.query.order_by(Order.total_price.asc()).all()
-    elif sort_by == 'status':
-        orders = Order.query.order_by(Order.status.asc()).all()
-    else:
-        orders = Order.query.order_by(Order.created_at.desc()).all()
-
+    orders = Order.query.order_by(Order.created_at.desc()).all()
     items = CraftItem.query.all()
     categories = Category.query.all()
+
     total_views = sum(i.views for i in items)
     total_likes = sum(i.likes for i in items)
     total_orders = len(orders)
     total_revenue = sum(o.total_price for o in orders)
     completed_orders = sum(1 for o in orders if o.status == "Completed")
+    
+    # Inventory Monitoring Counts
+    low_stock_items = [i for i in items if i.availability_type == "In Stock" and i.stock_quantity <= 3]
+    out_of_stock_items = [i for i in items if i.availability_type == "In Stock" and i.stock_quantity == 0]
 
     metrics = {
         "total_views": total_views,
         "total_likes": total_likes,
         "total_orders": total_orders,
         "total_revenue": total_revenue,
-        "completed_orders": completed_orders
+        "completed_orders": completed_orders,
+        "low_stock_count": len(low_stock_items),
+        "out_of_stock_count": len(out_of_stock_items)
     }
-    return render_template('admin.html', items=items, orders=orders, categories=categories, metrics=metrics, current_sort=sort_by)
+    return render_template('admin.html', items=items, orders=orders, categories=categories, metrics=metrics, low_stock_items=low_stock_items)
 
 @app.route('/admin/add-item', methods=['GET', 'POST'])
 @login_required
@@ -232,8 +240,10 @@ def add_item():
         description = request.form.get('description', '').strip()
         price = float(request.form.get('price', 0.0))
         category_name = request.form.get('category_name', 'General')
+        availability_type = request.form.get('availability_type', 'In Stock')
+        stock_quantity = int(request.form.get('stock_quantity', 0)) if availability_type == 'In Stock' else 0
+        
         image_url = "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=500&auto=format&fit=crop"
-
         file = request.files.get('image')
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -241,7 +251,15 @@ def add_item():
             file.save(file_path)
             image_url = f"/static/uploads/{filename}"
 
-        new_item = CraftItem(name=name, description=description, price=price, category_name=category_name, image_url=image_url)
+        new_item = CraftItem(
+            name=name, 
+            description=description, 
+            price=price, 
+            category_name=category_name, 
+            availability_type=availability_type,
+            stock_quantity=stock_quantity,
+            image_url=image_url
+        )
         db.session.add(new_item)
         db.session.commit()
         return redirect(url_for('admin_dashboard'))
@@ -258,6 +276,8 @@ def edit_item(item_id):
         item.description = request.form.get('description', item.description).strip()
         item.price = float(request.form.get('price', item.price))
         item.category_name = request.form.get('category_name', item.category_name)
+        item.availability_type = request.form.get('availability_type', 'In Stock')
+        item.stock_quantity = int(request.form.get('stock_quantity', 0)) if item.availability_type == 'In Stock' else 0
 
         file = request.files.get('image')
         if file and allowed_file(file.filename):
@@ -280,7 +300,9 @@ def duplicate_item(item_id):
         description=original.description,
         price=original.price,
         image_url=original.image_url,
-        category_name=original.category_name
+        category_name=original.category_name,
+        availability_type=original.availability_type,
+        stock_quantity=original.stock_quantity
     )
     db.session.add(duplicated)
     db.session.commit()
@@ -329,22 +351,6 @@ with app.app_context():
     if not AdminConfig.query.first():
         default_admin = AdminConfig(password_hash=generate_password_hash("hederaadmin"))
         db.session.add(default_admin)
-        db.session.commit()
-
-    if not Category.query.first():
-        cat1 = Category(name="Ceramics & Pottery", image_url="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop")
-        cat2 = Category(name="Macrame & Textiles", image_url="https://images.unsplash.com/photo-1528458909336-e7a0adfed0a5?w=500&auto=format&fit=crop")
-        cat3 = Category(name="Candles & Aromas", image_url="https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500&auto=format&fit=crop")
-        db.session.add_all([cat1, cat2, cat3])
-        db.session.commit()
-
-    if not CraftItem.query.first():
-        demo_items = [
-            CraftItem(name="Handmade Ceramic Mug", description="Wheel-thrown stoneware with a reactive glaze finish.", price=350.00, category_name="Ceramics & Pottery", image_url="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop"),
-            CraftItem(name="Macrame Wall Hanging", description="100% natural cotton cord on driftwood branch.", price=750.00, category_name="Macrame & Textiles", image_url="https://images.unsplash.com/photo-1528458909336-e7a0adfed0a5?w=500&auto=format&fit=crop"),
-            CraftItem(name="Beeswax Candle Set", description="Trio of hand-poured, clean-burning botanical candles.", price=280.00, category_name="Candles & Aromas", image_url="https://images.unsplash.com/photo-1603006905003-be475563bc59?w=500&auto=format&fit=crop")
-        ]
-        db.session.bulk_save_objects(demo_items)
         db.session.commit()
 
 if __name__ == '__main__':

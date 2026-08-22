@@ -2,80 +2,94 @@
 {% block content %}
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-      <h1 style="font-size: 1.8rem; color: #1e3a8a;">🔒 Macleen's Crafts Admin</h1>
-      <p style="color: #718096; font-size: 0.95rem;">Manage products, duplicate items, create categories, and track pickup orders.</p>
+      <h1 style="font-size: 1.8rem; color: #831843;">🔒 Macleen's Crafts Admin</h1>
+      <p style="color: #6b7280; font-size: 0.95rem;">Macleen's Food House pickup manager, stock monitoring & catalog inventory.</p>
     </div>
     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
       <a href="/admin/add-item" class="btn" style="width: auto; padding: 0.6rem 1.2rem;">+ Add Craft Item</a>
-      <a href="/admin/change-password" class="btn" style="width: auto; background: #4a5568; color: #fff; padding: 0.6rem 1rem;">🔑 Change Password</a>
-      <a href="/admin/logout" class="btn" style="width: auto; background: #e2e8f0; color: #4a5568; padding: 0.6rem 1rem;">Logout</a>
+      <a href="/admin/change-password" class="btn btn-outline" style="width: auto; padding: 0.6rem 1rem;">🔑 Change Password</a>
+      <a href="/admin/logout" class="btn" style="width: auto; background: #e5e7eb; color: #374151; padding: 0.6rem 1rem;">Logout</a>
     </div>
   </div>
 
-  <!-- Store Metrics -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
-    <div style="background: #ffffff; padding: 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
-      <small style="color: #718096; font-weight: 600;">Total Orders</small>
-      <h2 style="margin: 0.4rem 0 0 0; color: #2d3748;">{{ metrics.total_orders }}</h2>
+  <!-- Metric Overview Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;">
+    <div style="background: #ffffff; padding: 1.2rem; border-radius: 12px; border: 1px solid #fbcfe8; text-align: center;">
+      <small style="color: #6b7280; font-weight: 600;">Total Orders</small>
+      <h2 style="margin: 0.4rem 0 0 0; color: #1f2937;">{{ metrics.total_orders }}</h2>
     </div>
-    <div style="background: #ffffff; padding: 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
-      <small style="color: #718096; font-weight: 600;">Completed</small>
-      <h2 style="margin: 0.4rem 0 0 0; color: #2d5a27;">{{ metrics.completed_orders }}</h2>
+    <div style="background: #ffffff; padding: 1.2rem; border-radius: 12px; border: 1px solid #fbcfe8; text-align: center;">
+      <small style="color: #6b7280; font-weight: 600;">Total Sales</small>
+      <h2 style="margin: 0.4rem 0 0 0; color: #db2777;">₱{{ "{:,.2f}".format(metrics.total_revenue) }}</h2>
     </div>
-    <div style="background: #ffffff; padding: 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
-      <small style="color: #718096; font-weight: 600;">Est. Revenue</small>
-      <h2 style="margin: 0.4rem 0 0 0; color: #2d5a27;">₱{{ "{:,.2f}".format(metrics.total_revenue) }}</h2>
+    <div style="background: #ffffff; padding: 1.2rem; border-radius: 12px; border: 1px solid #fbcfe8; text-align: center;">
+      <small style="color: #d97706; font-weight: 600;">Low Stock Alert</small>
+      <h2 style="margin: 0.4rem 0 0 0; color: #d97706;">{{ metrics.low_stock_count }}</h2>
     </div>
-    <div style="background: #ffffff; padding: 1.2rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
-      <small style="color: #718096; font-weight: 600;">Total Views</small>
-      <h2 style="margin: 0.4rem 0 0 0; color: #2d3748;">{{ metrics.total_views }}</h2>
+    <div style="background: #ffffff; padding: 1.2rem; border-radius: 12px; border: 1px solid #fbcfe8; text-align: center;">
+      <small style="color: #dc2626; font-weight: 600;">Out of Stock</small>
+      <h2 style="margin: 0.4rem 0 0 0; color: #dc2626;">{{ metrics.out_of_stock_count }}</h2>
     </div>
   </div>
 
   <!-- Category Creator -->
-  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin-bottom: 2.5rem;">
-    <h3 style="color: #2d3748; margin-bottom: 0.5rem;">📁 Create New Product Category</h3>
+  <div style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; padding: 1.5rem; margin-bottom: 2.5rem;">
+    <h3 style="color: #831843; margin-bottom: 0.5rem;">📁 Create Product Category</h3>
     <form action="{{ url_for('add_category') }}" method="POST" enctype="multipart/form-data" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
       <div style="flex: 1; min-width: 220px;">
         <label style="font-size: 0.85rem; font-weight: 600;">Category Name</label>
-        <input type="text" name="cat_name" required placeholder="e.g. Resin Arts, Woven Bags" style="width: 100%; padding: 0.5rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; margin-top: 4px;">
+        <input type="text" name="cat_name" required placeholder="e.g. Stickers, Pins" style="width: 100%; padding: 0.55rem; border: 1px solid #fbcfe8; border-radius: 6px; margin-top: 4px; box-sizing: border-box;">
       </div>
       <div style="flex: 1; min-width: 220px;">
-        <label style="font-size: 0.85rem; font-weight: 600;">Category Cover Photo</label>
-        <input type="file" name="cat_image" accept="image/*" style="width: 100%; padding: 0.3rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; margin-top: 4px;">
+        <label style="font-size: 0.85rem; font-weight: 600;">Category Cover Image</label>
+        <input type="file" name="cat_image" accept="image/*" style="width: 100%; padding: 0.35rem; border: 1px solid #fbcfe8; border-radius: 6px; margin-top: 4px; box-sizing: border-box;">
       </div>
-      <button type="submit" class="btn" style="width: auto; padding: 0.55rem 1.2rem;">Save Category</button>
+      <button type="submit" class="btn" style="width: auto; padding: 0.6rem 1.4rem;">Save Category</button>
     </form>
   </div>
 
-  <!-- Product Inventory with Duplicate Option -->
-  <h3 style="margin-bottom: 1rem; color: #2d3748;">Active Inventory Items</h3>
-  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto; margin-bottom: 2.5rem;">
+  <!-- Inventory Table & Stock Monitoring -->
+  <h3 style="margin-bottom: 1rem; color: #831843;">📦 Inventory Monitoring & Active Catalog</h3>
+  <div style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; overflow-x: auto; margin-bottom: 2.5rem;">
     <table style="width: 100%; border-collapse: collapse; text-align: left;">
       <thead>
-        <tr style="background: #f8fafc; color: #4a5568; border-bottom: 1px solid #e2e8f0;">
-          <th style="padding: 10px;">Item</th>
-          <th style="padding: 10px;">Category</th>
-          <th style="padding: 10px;">Price</th>
-          <th style="padding: 10px;">Sales / Views</th>
-          <th style="padding: 10px;">Actions</th>
+        <tr style="background: #fdf2f8; color: #831843; border-bottom: 1px solid #fbcfe8;">
+          <th style="padding: 12px;">Craft</th>
+          <th style="padding: 12px;">Category</th>
+          <th style="padding: 12px;">Price</th>
+          <th style="padding: 12px;">Inventory Status</th>
+          <th style="padding: 12px;">Sales / Views</th>
+          <th style="padding: 12px;">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for item in items %}
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 10px; display: flex; align-items: center; gap: 10px;">
-            <img src="{{ item.image_url }}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px;" alt="">
+        <tr style="border-bottom: 1px solid #fdf2f8;">
+          <td style="padding: 12px; display: flex; align-items: center; gap: 10px;">
+            <img src="{{ item.image_url }}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px;" alt="">
             <strong>{{ item.name }}</strong>
           </td>
-          <td style="padding: 10px;"><span style="background: #edf2f7; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">{{ item.category_name }}</span></td>
-          <td style="padding: 10px; font-weight: bold; color: #2d5a27;">₱{{ "{:,.2f}".format(item.price) }}</td>
-          <td style="padding: 10px;">🛒 {{ item.orders_count }} sold &nbsp;|&nbsp; 👁️ {{ item.views }}</td>
-          <td style="padding: 10px;">
+          <td style="padding: 12px;"><span style="background: #fce7f3; color: #be185d; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">{{ item.category_name }}</span></td>
+          <td style="padding: 12px; font-weight: bold; color: #db2777;">₱{{ "{:,.2f}".format(item.price) }}</td>
+          <td style="padding: 12px;">
+            {% if item.availability_type == 'In Stock' %}
+              {% if item.stock_quantity == 0 %}
+                <span style="background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700;">⚠️ Sold Out (0 left)</span>
+              {% elif item.stock_quantity <= 3 %}
+                <span style="background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700;">⚡ Low Stock ({{ item.stock_quantity }} left)</span>
+              {% else %}
+                <span style="background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700;">✅ In Stock ({{ item.stock_quantity }} left)</span>
+              {% endif %}
+            {% else %}
+              <span style="background: #ede9fe; color: #6d28d9; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-weight: 700;">⏳ Pre-Order Only</span>
+            {% endif %}
+          </td>
+          <td style="padding: 12px; font-size: 0.9rem;">🛒 {{ item.orders_count }} sold &nbsp;|&nbsp; 👁️ {{ item.views }}</td>
+          <td style="padding: 12px;">
             <div style="display: flex; gap: 6px; flex-wrap: wrap;">
               <a href="{{ url_for('edit_item', item_id=item.id) }}" class="btn-edit">✏️ Edit</a>
               <form action="{{ url_for('duplicate_item', item_id=item.id) }}" method="POST">
-                <button type="submit" class="btn" style="background: #4a5568; color: #fff; padding: 6px 10px; font-size: 0.85rem;">📋 Duplicate</button>
+                <button type="submit" class="btn" style="background: #6b7280; width: auto; padding: 6px 10px; font-size: 0.85rem;">📋 Duplicate</button>
               </form>
               <form action="{{ url_for('delete_item', item_id=item.id) }}" method="POST" onsubmit="return confirm('Delete this craft item?');">
                 <button type="submit" class="btn-delete">🗑️</button>
@@ -88,66 +102,87 @@
     </table>
   </div>
 
-  <!-- Pickup Orders Section with Sorting -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-    <h3 style="color: #2d3748; margin: 0;">Macleen's Food House Pickup Orders ({{ orders|length }})</h3>
-    <form method="GET" style="display: flex; align-items: center; gap: 8px;">
-      <label style="font-size: 0.9rem; font-weight: 600; color: #4a5568;">Sort By:</label>
-      <select name="sort" onchange="this.form.submit()" style="padding: 6px 10px; border: 1px solid #cbd5e0; border-radius: 6px;">
-        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Date (Newest First)</option>
-        <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Date (Oldest First)</option>
-        <option value="highest_price" {% if current_sort == 'highest_price' %}selected{% endif %}>Total Amount (High to Low)</option>
-        <option value="lowest_price" {% if current_sort == 'lowest_price' %}selected{% endif %}>Total Amount (Low to High)</option>
-        <option value="status" {% if current_sort == 'status' %}selected{% endif %}>Order Status</option>
-      </select>
-    </form>
-  </div>
-
-  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow-x: auto;">
+  <!-- 1. Active / Pending Pickup Orders -->
+  <h3 style="color: #db2777; margin-bottom: 1rem;">📦 Active Pickup Orders (Pending & Ready)</h3>
+  <div style="background: #ffffff; border: 1px solid #fbcfe8; border-radius: 12px; overflow-x: auto; margin-bottom: 3rem;">
     <table style="width: 100%; border-collapse: collapse; text-align: left;">
       <thead>
-        <tr style="background: #2d5a27; color: #ffffff;">
+        <tr style="background: #ec4899; color: #ffffff;">
           <th style="padding: 12px;">Order ID</th>
           <th style="padding: 12px;">Customer Details</th>
           <th style="padding: 12px;">Item & Qty</th>
           <th style="padding: 12px;">Total Price</th>
           <th style="padding: 12px;">Status</th>
-          <th style="padding: 12px;">Action</th>
+          <th style="padding: 12px;">Update Status</th>
         </tr>
       </thead>
       <tbody>
-        {% for o in orders %}
-        <tr style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 12px; vertical-align: top;">#{{ o.id }}<br><small style="color: #a0aec0;">{{ o.created_at.strftime('%b %d, %Y') }}</small></td>
-          <td style="padding: 12px; vertical-align: top;">
-            <strong>{{ o.customer_name }}</strong><br>
-            📞 {{ o.contact_number }}<br>
-            ✉️ {{ o.email }}<br>
-            💬 FB: {{ o.fb_account }}
-          </td>
-          <td style="padding: 12px; vertical-align: top;">{{ o.craft_item.name }} (x{{ o.quantity }})</td>
-          <td style="padding: 12px; vertical-align: top; font-weight: bold; color: #2d5a27;">₱{{ "{:,.2f}".format(o.total_price) }}</td>
-          <td style="padding: 12px; vertical-align: top;">
-            <span class="badge {% if o.status == 'Pending' %}badge-pending{% elif o.status == 'Ready for Pickup' %}badge-ready{% else %}badge-completed{% endif %}">
-              {{ o.status }}
-            </span>
-          </td>
-          <td style="padding: 12px; vertical-align: top;">
-            <form action="{{ url_for('update_order_status', order_id=o.id) }}" method="POST" style="display: flex; gap: 6px;">
-              <select name="status" style="padding: 4px 6px; border: 1px solid #cbd5e0; border-radius: 4px;">
-                <option value="Pending" {% if o.status == 'Pending' %}selected{% endif %}>Pending</option>
-                <option value="Ready for Pickup" {% if o.status == 'Ready for Pickup' %}selected{% endif %}>Ready for Pickup</option>
-                <option value="Completed" {% if o.status == 'Completed' %}selected{% endif %}>Completed (Closed)</option>
-              </select>
-              <button type="submit" class="btn" style="width: auto; padding: 4px 10px; font-size: 0.8rem;">Update</button>
-            </form>
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="6" style="padding: 24px; text-align: center; color: #a0aec0;">No pickup orders placed yet.</td>
-        </tr>
+        {% set active_orders = [] %}
+        {% for o in orders if o.status != 'Completed' %}
+          {% set _ = active_orders.append(o) %}
+          <tr style="border-bottom: 1px solid #fdf2f8;">
+            <td style="padding: 12px; vertical-align: top;">#{{ o.id }}<br><small style="color: #9ca3af;">{{ o.created_at.strftime('%b %d, %Y') }}</small></td>
+            <td style="padding: 12px; vertical-align: top;">
+              <strong>{{ o.customer_name }}</strong><br>
+              📞 {{ o.contact_number }}<br>
+              💬 FB: {{ o.fb_account }}
+            </td>
+            <td style="padding: 12px; vertical-align: top;">{{ o.craft_item.name }} (x{{ o.quantity }})</td>
+            <td style="padding: 12px; vertical-align: top; font-weight: bold; color: #db2777;">₱{{ "{:,.2f}".format(o.total_price) }}</td>
+            <td style="padding: 12px; vertical-align: top;">
+              <span class="badge {% if o.status == 'Pending' %}badge-pending{% else %}badge-ready{% endif %}">{{ o.status }}</span>
+            </td>
+            <td style="padding: 12px; vertical-align: top;">
+              <form action="{{ url_for('update_order_status', order_id=o.id) }}" method="POST" style="display: flex; gap: 6px;">
+                <select name="status" style="padding: 4px 6px; border: 1px solid #fbcfe8; border-radius: 6px;">
+                  <option value="Pending" {% if o.status == 'Pending' %}selected{% endif %}>Pending</option>
+                  <option value="Ready for Pickup" {% if o.status == 'Ready for Pickup' %}selected{% endif %}>Ready for Pickup</option>
+                  <option value="Completed">Complete & Archive</option>
+                </select>
+                <button type="submit" class="btn" style="width: auto; padding: 4px 10px; font-size: 0.8rem;">Save</button>
+              </form>
+            </td>
+          </tr>
         {% endfor %}
+        {% if not active_orders %}
+        <tr>
+          <td colspan="6" style="padding: 24px; text-align: center; color: #9ca3af;">No pending or active orders at the moment.</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 2. Auto-Archived Completed Orders -->
+  <h3 style="color: #15803d; margin-bottom: 1rem;">📁 Completed Orders Archive</h3>
+  <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; opacity: 0.85;">
+      <thead>
+        <tr style="background: #f3f4f6; color: #374151;">
+          <th style="padding: 12px;">Order ID</th>
+          <th style="padding: 12px;">Customer</th>
+          <th style="padding: 12px;">Item</th>
+          <th style="padding: 12px;">Amount</th>
+          <th style="padding: 12px;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set completed_list = [] %}
+        {% for o in orders if o.status == 'Completed' %}
+          {% set _ = completed_list.append(o) %}
+          <tr style="border-bottom: 1px solid #f3f4f6;">
+            <td style="padding: 12px;">#{{ o.id }} <small style="color: #9ca3af;">({{ o.created_at.strftime('%b %d') }})</small></td>
+            <td style="padding: 12px;">{{ o.customer_name }} ({{ o.contact_number }})</td>
+            <td style="padding: 12px;">{{ o.craft_item.name }} (x{{ o.quantity }})</td>
+            <td style="padding: 12px; font-weight: bold; color: #15803d;">₱{{ "{:,.2f}".format(o.total_price) }}</td>
+            <td style="padding: 12px;"><span class="badge badge-completed">Completed</span></td>
+          </tr>
+        {% endfor %}
+        {% if not completed_list %}
+        <tr>
+          <td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af;">No completed orders in the archive yet.</td>
+        </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>

@@ -1,43 +1,60 @@
 {% extends 'base.html' %}
 {% block content %}
-  <p style="margin-bottom: 1.5rem;"><a href="/" style="color: #2d5a27; font-weight: 600; text-decoration: none;">← Back to All Crafts</a></p>
+  <p style="margin-bottom: 1.5rem;"><a href="/" style="color: #db2777; font-weight: 600; text-decoration: none;">← Back to Catalog</a></p>
 
-  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; display: flex; gap: 2.5rem; flex-wrap: wrap;">
-    <img src="{{ item.image_url }}" style="width: 380px; height: 280px; object-fit: cover; border-radius: 8px; border: 1px solid #eee;" alt="{{ item.name }}">
-    <div style="flex: 1; min-width: 280px;">
-      <h1 style="font-size: 2rem; color: #1a202c; margin-bottom: 0.5rem;">{{ item.name }}</h1>
-      <h2 style="color: #2d5a27; font-size: 1.6rem; margin-bottom: 1rem;">₱{{ "{:,.2f}".format(item.price) }}</h2>
-      <p style="color: #4a5568; margin-bottom: 1.5rem;">{{ item.description }}</p>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem; background: white; padding: 2rem; border-radius: 16px; border: 1px solid #fbcfe8;">
+    <div>
+      <img src="{{ item.image_url }}" alt="{{ item.name }}" style="width: 100%; border-radius: 12px; object-fit: cover; max-height: 420px;">
+    </div>
+    
+    <div>
+      <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 0.5rem;">
+        <span style="background: #fce7f3; color: #be185d; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.85rem;">{{ item.category_name }}</span>
+        {% if item.availability_type == 'In Stock' %}
+          {% if item.stock_quantity > 0 %}
+            <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.85rem;">✅ In Stock ({{ item.stock_quantity }} available)</span>
+          {% else %}
+            <span style="background: #fee2e2; color: #dc2626; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.85rem;">⚠️ Sold Out</span>
+          {% endif %}
+        {% else %}
+          <span style="background: #ede9fe; color: #6d28d9; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.85rem;">⏳ Pre-Order (Made to Order)</span>
+        {% endif %}
+      </div>
 
-      <div style="display: flex; gap: 1rem; align-items: center;">
+      <h1 style="font-size: 2rem; color: #1e293b; margin-bottom: 0.5rem;">{{ item.name }}</h1>
+      <div style="font-size: 1.8rem; font-weight: 800; color: #db2777; margin-bottom: 1.2rem;">₱{{ "{:,.2f}".format(item.price) }}</div>
+      
+      <p style="color: #4b5563; font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">{{ item.description }}</p>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 2rem;">
+        {% if item.availability_type == 'In Stock' and item.stock_quantity == 0 %}
+          <button disabled class="btn" style="background: #9ca3af; cursor: not-allowed;">Sold Out</button>
+        {% else %}
+          <a href="{{ url_for('order_item', item_id=item.id) }}" class="btn">
+            {% if item.availability_type == 'In Stock' %}Reserve & Pick Up{% else %}Pre-Order Now{% endif %}
+          </a>
+        {% endif %}
         <form action="{{ url_for('like_item', item_id=item.id) }}" method="POST">
-          <button class="btn btn-like" type="submit">❤️ Like ({{ item.likes }})</button>
+          <button type="submit" class="btn btn-outline" style="width: auto; padding: 0.65rem 1.2rem;">❤️ {{ item.likes }}</button>
         </form>
-        <a href="{{ url_for('order_item', item_id=item.id) }}" class="btn" style="width: auto; padding: 0.6rem 1.8rem;">🛒 Order for Pickup</a>
+      </div>
+
+      <div style="border-top: 1px solid #fbcfe8; padding-top: 1.5rem;">
+        <h3 style="color: #831843; margin-bottom: 1rem;">Customer Reviews & Questions ({{ item.comments|length }})</h3>
+        
+        <form action="{{ url_for('add_comment', item_id=item.id) }}" method="POST" style="margin-bottom: 1.5rem;">
+          <input type="text" name="author" placeholder="Your Name" style="width: 100%; padding: 0.5rem; border: 1px solid #fbcfe8; border-radius: 6px; margin-bottom: 0.5rem; box-sizing: border-box;">
+          <textarea name="content" required placeholder="Write a comment..." rows="2" style="width: 100%; padding: 0.5rem; border: 1px solid #fbcfe8; border-radius: 6px; margin-bottom: 0.5rem; box-sizing: border-box;"></textarea>
+          <button type="submit" class="btn" style="width: auto; padding: 0.4rem 1rem; font-size: 0.9rem;">Post Comment</button>
+        </form>
+
+        {% for c in item.comments %}
+          <div style="background: #fff5f7; padding: 0.8rem; border-radius: 8px; margin-bottom: 0.6rem;">
+            <strong>{{ c.author }}</strong> <small style="color: #9ca3af;">• {{ c.timestamp.strftime('%b %d') }}</small>
+            <p style="margin-top: 4px; color: #374151;">{{ c.content }}</p>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </div>
-
-  <hr style="margin: 2.5rem 0; border: none; border-top: 1px solid #e2e8f0;">
-
-  <h3 style="margin-bottom: 1rem;">Customer Feedback & Comments ({{ item.comments|length }})</h3>
-  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; max-width: 600px; margin-bottom: 2rem;">
-    <form action="{{ url_for('add_comment', item_id=item.id) }}" method="POST">
-      <input type="text" name="author" placeholder="Your name (optional)" style="width: 100%; padding: 0.6rem; margin-bottom: 0.8rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;">
-      <textarea name="content" required placeholder="Write a comment or question..." style="width: 100%; height: 80px; padding: 0.6rem; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;"></textarea>
-      <button class="btn" type="submit" style="width: auto; margin-top: 0.8rem; padding: 0.5rem 1.2rem;">Post Comment</button>
-    </form>
-  </div>
-
-  {% for c in item.comments %}
-    <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1rem 1.2rem; border-radius: 8px; margin-bottom: 0.8rem; max-width: 600px;">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
-        <strong style="color: #2d3748;">{{ c.author }}</strong>
-        <span style="font-size: 0.8rem; color: #a0aec0;">{{ c.timestamp.strftime('%b %d, %Y %I:%M %p') }}</span>
-      </div>
-      <p style="color: #4a5568; margin: 0;">{{ c.content }}</p>
-    </div>
-  {% else %}
-    <p style="color: #718096;">No comments yet.</p>
-  {% endfor %}
 {% endblock %}

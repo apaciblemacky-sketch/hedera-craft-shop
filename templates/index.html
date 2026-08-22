@@ -1,24 +1,37 @@
 {% extends 'base.html' %}
 {% block content %}
-  <!-- Top Banner -->
-  <div style="background: linear-gradient(135deg, #2d5a27 0%, #1e3d1a 100%); color: white; padding: 2.5rem; border-radius: 12px; margin-bottom: 2.5rem; text-align: center;">
-    <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">🌿 Welcome to Hedera Crafts</h1>
-    <p style="font-size: 1.1rem; opacity: 0.9;">Handcrafted creations available for pickup at <strong>Macleen's Food House</strong></p>
+  <!-- Pink Themed Hero Banner -->
+  <div style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); color: white; padding: 2.8rem 2rem; border-radius: 16px; margin-bottom: 2.5rem; text-align: center; box-shadow: 0 10px 20px rgba(236, 72, 153, 0.15);">
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.4rem; font-weight: 800;">🎨 Macleen's Crafts</h1>
+    <p style="font-size: 1.15rem; font-weight: 600; opacity: 0.95;">by Macleen's Food House</p>
+    <p style="font-size: 0.95rem; margin-top: 0.5rem; opacity: 0.9;">Custom handcrafted gifts & stationery • Pick up at <strong>Macleen's Food House</strong></p>
   </div>
 
   <!-- Top Sellers Showcase -->
   {% if top_sellers and not selected_category %}
     <div style="margin-bottom: 3rem;">
-      <h2 style="font-size: 1.5rem; color: #1a202c; margin-bottom: 1rem;">⭐ Top Sellers & Featured</h2>
+      <h2 style="font-size: 1.4rem; color: #831843; margin-bottom: 1rem;">⭐ Top Sellers & Showcase</h2>
       <div class="product-grid">
         {% for item in top_sellers %}
-          <div class="product-card" style="border: 2px solid #2d5a27;">
+          <div class="product-card" style="border: 2px solid #f472b6;">
             <div style="position: relative;">
-              <span style="position: absolute; top: 10px; left: 10px; background: #2d5a27; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">⭐ TOP SELLER</span>
+              <span style="position: absolute; top: 10px; left: 10px; background: #ec4899; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">⭐ TOP PICK</span>
+              
+              <!-- Availability Tag -->
+              {% if item.availability_type == 'In Stock' %}
+                {% if item.stock_quantity > 0 %}
+                  <span style="position: absolute; top: 10px; right: 10px; background: #10b981; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">In Stock ({{ item.stock_quantity }})</span>
+                {% else %}
+                  <span style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">Sold Out</span>
+                {% endif %}
+              {% else %}
+                <span style="position: absolute; top: 10px; right: 10px; background: #8b5cf6; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">Pre-Order</span>
+              {% endif %}
+
               <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image">
             </div>
             <div class="product-body">
-              <small style="color: #2d5a27; font-weight: bold;">{{ item.category_name }}</small>
+              <small style="color: #db2777; font-weight: bold;">{{ item.category_name }}</small>
               <h3 class="product-title">{{ item.name }}</h3>
               <div class="product-price">₱{{ "{:,.2f}".format(item.price) }}</div>
               <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn">View & Reserve</a>
@@ -29,19 +42,19 @@
     </div>
   {% endif %}
 
-  <!-- Categories Showcase with Pictures -->
-  <h2 style="font-size: 1.5rem; color: #1a202c; margin-bottom: 1rem;">🏷️ Browse by Category</h2>
-  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 3rem;">
+  <!-- Categories Showcase -->
+  <h2 style="font-size: 1.4rem; color: #831843; margin-bottom: 1rem;">🏷️ Browse by Category</h2>
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1.2rem; margin-bottom: 3rem;">
     <a href="/" style="text-decoration: none; color: inherit;">
-      <div style="background: white; border: 1px solid {% if not selected_category %}#2d5a27{% else %}#e2e8f0{% endif %}; border-radius: 8px; padding: 1rem; text-align: center; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+      <div style="background: white; border: 2px solid {% if not selected_category %}#ec4899{% else %}#fbcfe8{% endif %}; border-radius: 12px; padding: 1.2rem; text-align: center; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         ✨ All Crafts
       </div>
     </a>
     {% for cat in categories %}
       <a href="/?category={{ cat.name }}" style="text-decoration: none; color: inherit;">
-        <div style="background: white; border: 1px solid {% if selected_category == cat.name %}#2d5a27{% else %}#e2e8f0{% endif %}; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.04);">
+        <div style="background: white; border: 2px solid {% if selected_category == cat.name %}#ec4899{% else %}#fbcfe8{% endif %}; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
           <img src="{{ cat.image_url }}" style="width: 100%; height: 110px; object-fit: cover;" alt="{{ cat.name }}">
-          <div style="padding: 0.8rem; text-align: center; font-weight: 600; color: #2d3748; font-size: 0.95rem;">
+          <div style="padding: 0.8rem; text-align: center; font-weight: 700; color: #374151; font-size: 0.95rem;">
             {{ cat.name }}
           </div>
         </div>
@@ -50,19 +63,32 @@
   </div>
 
   <!-- Product Catalog -->
-  <div class="page-header">
-    <h2 class="page-title">
-      {% if selected_category %}{{ selected_category }} Collection{% else %}Full Collection{% endif %}
-    </h2>
-    <p class="page-subtitle">{{ items|length }} item(s) listed</p>
+  <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end;">
+    <div>
+      <h2 style="font-size: 1.4rem; color: #831843;">
+        {% if selected_category %}{{ selected_category }}{% else %}Full Craft Catalog{% endif %}
+      </h2>
+      <p style="color: #6b7280; font-size: 0.9rem;">{{ items|length }} item(s) listed</p>
+    </div>
   </div>
 
   <div class="product-grid">
     {% for item in items %}
       <div class="product-card">
-        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image">
+        <div style="position: relative;">
+          {% if item.availability_type == 'In Stock' %}
+            {% if item.stock_quantity > 0 %}
+              <span style="position: absolute; top: 10px; right: 10px; background: #10b981; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">In Stock ({{ item.stock_quantity }})</span>
+            {% else %}
+              <span style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">Sold Out</span>
+            {% endif %}
+          {% else %}
+            <span style="position: absolute; top: 10px; right: 10px; background: #8b5cf6; color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">Pre-Order</span>
+          {% endif %}
+          <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image">
+        </div>
         <div class="product-body">
-          <small style="color: #718096;">{{ item.category_name }}</small>
+          <small style="color: #9ca3af;">{{ item.category_name }}</small>
           <h3 class="product-title">{{ item.name }}</h3>
           <div class="product-price">₱{{ "{:,.2f}".format(item.price) }}</div>
           <div class="product-stats">
@@ -75,7 +101,7 @@
         </div>
       </div>
     {% else %}
-      <p style="color: #718096;">No craft items found in this category.</p>
+      <p style="color: #9ca3af;">No crafts listed in this category yet.</p>
     {% endfor %}
   </div>
 {% endblock %}
