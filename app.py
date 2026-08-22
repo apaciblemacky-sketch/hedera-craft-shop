@@ -346,8 +346,20 @@ def update_order_status(order_id):
     return redirect(url_for('admin_dashboard'))
 
 # App Startup Initialization
+from sqlalchemy import text
+
 with app.app_context():
     db.create_all()
+
+    # Automatically add missing columns to PostgreSQL if they don't exist yet
+    with db.engine.connect() as conn:
+        try:
+            conn.execute(text("ALTER TABLE craft_item ADD COLUMN IF NOT EXISTS availability_type VARCHAR(20) DEFAULT 'In Stock';"))
+            conn.execute(text("ALTER TABLE craft_item ADD COLUMN IF NOT EXISTS stock_quantity INTEGER DEFAULT 10;"))
+            conn.commit()
+        except Exception as e:
+            print("Column migration note:", e)
+
     if not AdminConfig.query.first():
         default_admin = AdminConfig(password_hash=generate_password_hash("hederaadmin"))
         db.session.add(default_admin)
